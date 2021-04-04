@@ -20,29 +20,6 @@ self.addEventListener("install", event => {
     );
 });
 
-// The activate handler takes care of cleaning up old caches.
-// self.addEventListener("activate", event => {
-//     const currentCaches = [STATIC_CACHE, RUNTIME_CACHE];
-//     event.waitUntil(
-//         caches
-//             .keys()
-//             .then(cacheNames => {
-//                 // return array of cache names that are old to delete
-//                 return cacheNames.filter(
-//                     cacheName => !currentCaches.includes(cacheName)
-//                 );
-//             })
-//             .then(cachesToDelete => {
-//                 return Promise.all(
-//                     cachesToDelete.map(cacheToDelete => {
-//                         return caches.delete(cacheToDelete);
-//                     })
-//                 );
-//             })
-//             .then(() => self.clients.claim())
-//     );
-// });
-
 self.addEventListener("fetch", event => {
     // non GET requests are not cached and requests to other origins are not cached
     if (
@@ -52,7 +29,6 @@ self.addEventListener("fetch", event => {
         event.respondWith(fetch(event.request));
         return;
     }
-
 
     // handle runtime GET requests for data from /api routes
     if (event.request.url.includes("/api/")) {
@@ -78,7 +54,7 @@ self.addEventListener("fetch", event => {
     // use cache first for all other requests for performance
     event.respondWith(
         fetch(event.request)
-            .catch(function() {
+            .catch(function () {
                 return caches.match(event.request)
                     .then(response => {
                         if (response) {
@@ -87,16 +63,7 @@ self.addEventListener("fetch", event => {
                         else if (event.request.headers.get("accept").includes("text/html")) {
                             return caches.match("/");
                         }
-                    })
-
-                // request is not in cache. make network request and cache the response
-                // return caches.open(RUNTIME_CACHE).then(cache => {
-                //     return fetch(event.request).then(response => {
-                //         return cache.put(event.request, response.clone()).then(() => {
-                //             return response;
-                //         });
-                //     });
-                // });
+                    });
             })
     );
 });
